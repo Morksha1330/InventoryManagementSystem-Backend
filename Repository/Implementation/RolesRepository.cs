@@ -1,6 +1,7 @@
 ﻿using InventoryMgtSystem.Data;
 using InventoryMgtSystem.Models.Entities;
 using InventoryMgtSystem.Repository.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryMgtSystem.Repository.Implementation
 {
@@ -31,9 +32,9 @@ namespace InventoryMgtSystem.Repository.Implementation
             return _context.Roles.ToList();
         }
 
-        public Role GetData(int id)
+        public async Task<Role> GetData(int id)
         {
-            var data = _context.Roles.FirstOrDefault(x => x.Id == id);
+            var data =  await _context.Roles.FirstOrDefaultAsync(x => x.Id == id);
             if (data == null)
                 throw new KeyNotFoundException("Data Not Fount");
             return data;

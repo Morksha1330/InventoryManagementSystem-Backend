@@ -40,6 +40,7 @@ namespace InventoryMgtSystem.Controllers
             _userservice = userservice;
             _jwt = jwtService;
         }
+        // Update your AuthController Login method
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<LoginResponseModel>> Login([FromBody] LoginDto login)
@@ -47,7 +48,9 @@ namespace InventoryMgtSystem.Controllers
             var response = new HttpResponseData<object>();
             try
             {
-                var user = await _database.Users.FirstOrDefaultAsync(u => u.Username == login.Username || u.Email == login.Username);
+                var user = await _database.Users
+                    .Include(u => u.Role) 
+                    .FirstOrDefaultAsync(u => u.Username == login.Username || u.Email == login.Username);
 
                 if (user == null)
                 {
@@ -56,7 +59,6 @@ namespace InventoryMgtSystem.Controllers
                     response.ResponsCode = 401;
                     return Unauthorized(response);
                 }
-
 
                 var result = BCrypt.Net.BCrypt.Verify(login.Password, user.Password); 
                 if (!result)
@@ -80,7 +82,9 @@ namespace InventoryMgtSystem.Controllers
                         user.Username,
                         user.Name,
                         user.Email,
-                        user.Role,
+                        RoleName = user.Role.RoleName ?? "User", 
+                        user.EPF_No,
+                        user.Active
                     }
                 };
                 response.ResponsCode = 200;
@@ -94,8 +98,6 @@ namespace InventoryMgtSystem.Controllers
                 response.ResponsCode = 500;
                 return StatusCode(500, response);
             }
-
-
         }
 
         [HttpPost("register")]
@@ -116,7 +118,7 @@ namespace InventoryMgtSystem.Controllers
                 user.EPF_No = register.EPF_No;
                 user.Username = register.Username;
                 user.Email = register.Email;
-                user.Role = register.Role=="Admin"? 1:0;
+                user.RoleId = register.Role=="Admin"? 1:0;
                 user.Active = true;
                 user.InitialAttempt = 0;
                 user.Password = hashedPassword;
