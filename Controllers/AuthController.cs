@@ -49,7 +49,7 @@ namespace InventoryMgtSystem.Controllers
             try
             {
                 var user = await _database.Users
-                    .Include(u => u.Role) // Assuming you have a Role navigation property
+                    .Include(u => u.Role) 
                     .FirstOrDefaultAsync(u => u.Username == login.Username || u.Email == login.Username);
 
                 if (user == null)
