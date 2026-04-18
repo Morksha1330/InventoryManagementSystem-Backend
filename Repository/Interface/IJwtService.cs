@@ -32,7 +32,9 @@ namespace InventoryMgtSystem.Repository.Interface
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
                 new Claim("Name", user.Name),
                 new Claim("Username", user.Username),
-                new Claim("Role", user.Role.ToString() ?? ""),
+                new Claim("role", user.Role?.RoleName ?? "User"),
+                new Claim("EPF_No", user.EPF_No ?? ""),
+                new Claim("active", user.Active.ToString())
             };
 
             
