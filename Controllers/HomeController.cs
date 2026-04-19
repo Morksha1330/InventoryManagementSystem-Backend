@@ -99,7 +99,7 @@ namespace InventoryMgtSystem.Controllers
                     CategoryId = product.CategoryId,
                     SKU = product.SKU,
                     UnitPrice = product.UnitPrice,
-                    Active = product.Status,
+                    Active = product.Active,
                     CreatedDate = DateTime.Now,
                     CreatedUser = userId
                 };
@@ -132,9 +132,9 @@ namespace InventoryMgtSystem.Controllers
                          CategoryName = b.CategoryName,
                          SKU = a.SKU,
                          UnitPrice = a.UnitPrice,
-                         Status = a.Active,
+                         Active = a.Active,
                          CategoryId = a.CategoryId,
-                         ProductId = a.Id
+                         Id = a.Id
 
                      }).ToList();
             return Ok(customProduct);

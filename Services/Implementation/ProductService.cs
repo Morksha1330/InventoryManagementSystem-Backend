@@ -1,6 +1,7 @@
 ﻿using InventoryMgtSystem.DTO;
 using InventoryMgtSystem.Models;
 using InventoryMgtSystem.Models.Entities;
+using InventoryMgtSystem.Repositories;
 using InventoryMgtSystem.Repositories.Interface;
 using InventoryMgtSystem.Repository.Implementation;
 using InventoryMgtSystem.Repository.Interface;
@@ -18,6 +19,36 @@ namespace InventoryMgtSystem.Services
             _repo = repo;
         }
 
+        public async Task<HttpResponseData<PagedResultDto<ProductDTO>>> GetPagedProductsAsync(RequestFilterDto filter)
+        {
+            var response = new HttpResponseData<PagedResultDto<ProductDTO>>();
+
+            try
+            {
+                // ✅ Sanitize inputs
+                filter.PageNumber = Math.Max(1, filter.PageNumber);
+                filter.PageSize = Math.Clamp(filter.PageSize, 1, 100);
+                filter.SortBy = string.IsNullOrWhiteSpace(filter.SortBy) ? "Id" : filter.SortBy;
+                filter.SortOrder = filter.SortOrder?.ToUpper() == "DESC" ? "DESC" : "ASC";
+
+                var result = await _repo.GetPagedProductsAsync(filter);
+
+                response.Result = result;
+                response.Success = true;
+                response.ResponsCode = 200;
+                response.Message = "Products retrieved successfully";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.ResponsCode = 500;
+                response.Error = ex.Message;
+                response.Message = "Error retrieving products";
+            }
+
+            return response;
+        }
+
         public async Task<HttpResponseData<ProductDTO>> GetAllProducts()
         {
             var response = new HttpResponseData<ProductDTO>();
@@ -26,12 +57,12 @@ namespace InventoryMgtSystem.Services
 
             response.Results = products.Select(p => new ProductDTO
             {
-                ProductId = p.Id,
+                Id = p.Id,
                 ProductName = p.ProductName,
                 CategoryId = p.CategoryId,
                 SKU = p.SKU,
                 UnitPrice = p.UnitPrice,
-                Status = p.Active
+                Active = p.Active
             }).ToList();
 
             response.Success = true;
@@ -52,12 +83,12 @@ namespace InventoryMgtSystem.Services
 
             response.Result = new ProductDTO
             {
-                ProductId = product.Id,
+                Id = product.Id,
                 ProductName = product.ProductName,
                 CategoryId = product.CategoryId,
                 SKU = product.SKU,
                 UnitPrice = product.UnitPrice,
-                Status = product.Active
+                Active = product.Active
             };
 
             response.Success = true;
@@ -74,14 +105,14 @@ namespace InventoryMgtSystem.Services
                 CategoryId = dto.CategoryId,
                 SKU = dto.SKU,
                 UnitPrice = dto.UnitPrice,
-                Active = dto.Status
+                Active = dto.Active
             };
 
             var created = await _repo.AddAsync(product);
 
             response.Result = new ProductDTO
             {
-                ProductId = created.Id,
+                Id = created.Id,
                 ProductName = created.ProductName
             };
 
@@ -97,12 +128,12 @@ namespace InventoryMgtSystem.Services
 
             var product = new Product
             {
-                Id = dto.ProductId,
+                Id = dto.Id,
                 ProductName = dto.ProductName,
                 CategoryId = dto.CategoryId,
                 SKU = dto.SKU,
                 UnitPrice = dto.UnitPrice,
-                Active = dto.Status
+                Active = dto.Active
             };
 
             var updated = await _repo.UpdateAsync(product);

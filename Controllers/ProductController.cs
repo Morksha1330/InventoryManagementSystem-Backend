@@ -1,5 +1,6 @@
 ﻿using InventoryMgtSystem.DTO;
 using InventoryMgtSystem.Models;
+using InventoryMgtSystem.Services;
 using InventoryMgtSystem.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,10 +17,34 @@ namespace InventoryMgtSystem.Controllers
             _service = service;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<HttpResponseData<ProductDTO>>> GetAll()
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPagedProducts([FromQuery] RequestFilterDto filter)
         {
-            return Ok(await _service.GetAllProducts());
+            var response = await _service.GetPagedProductsAsync(filter);
+
+            if (!response.Success)
+            {
+                return StatusCode(response.ResponsCode, response);
+            }
+
+            var result = new
+            {
+                response.Success,
+                response.ResponsCode,
+                response.Message,
+                Data = response.Result.Items,
+                Pagination = new
+                {
+                    response.Result.TotalCount,
+                    response.Result.PageNumber,
+                    response.Result.PageSize,
+                    response.Result.TotalPages,
+                    response.Result.HasPreviousPage,
+                    response.Result.HasNextPage
+                }
+            };
+
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
