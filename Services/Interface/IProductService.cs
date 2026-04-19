@@ -5,6 +5,7 @@ namespace InventoryMgtSystem.Services.Interface
 {
     public interface IProductService
     {
+        Task<HttpResponseData<PagedResultDto<ProductDTO>>> GetPagedProductsAsync(RequestFilterDto filter);
         Task<HttpResponseData<ProductDTO>> GetAllProducts();
         Task<HttpResponseData<ProductDTO>> GetProductById(int id);
         Task<HttpResponseData<ProductDTO>> AddProduct(ProductDTO dto);
