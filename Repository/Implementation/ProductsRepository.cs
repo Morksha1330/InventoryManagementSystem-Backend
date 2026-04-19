@@ -1,52 +1,62 @@
 ﻿using InventoryMgtSystem.Data;
 using InventoryMgtSystem.Models.Entities;
+using InventoryMgtSystem.Repositories.Interface;
 using InventoryMgtSystem.Repository.Interface;
+using Microsoft.EntityFrameworkCore;
+using System;
 
-namespace InventoryMgtSystem.Repository.Implementation
+namespace InventoryMgtSystem.Repositories
 {
-    public class ProductsRepository : IProductsRepository
+    public class ProductRepository : IProductRepository
     {
         private readonly ApplicationDbContext _context;
 
-        public ProductsRepository(ApplicationDbContext context)
+        public ProductRepository(ApplicationDbContext context)
         {
             _context = context;
         }
-        public void Add(Product data)
+
+        public async Task<List<Product>> GetAllAsync()
         {
-            _context.Products.Add(data);
+            return await _context.Products.ToListAsync();
         }
 
-        public void Delete(int id)
+        public async Task<Product?> GetByIdAsync(int id)
         {
-            var data = _context.Products.Find(id);
-            if (data != null)
-            {
-                _context.Products.Remove(data);
-            }
+            return await _context.Products.FindAsync(id);
         }
 
-        public IEnumerable<Product> GetAll()
+        public async Task<Product> AddAsync(Product product)
         {
-            return _context.Products.ToList();
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+            return product;
         }
 
-        public Product GetData(int id)
+        public async Task<Product?> UpdateAsync(Product product)
         {
-            var data = _context.Products.FirstOrDefault(x => x.Id == id);
-            if (data == null)
-                throw new KeyNotFoundException("Data Not Fount");
-            return data;
+            var existing = await _context.Products.FindAsync(product.Id);
+            if (existing == null) return null;
+
+            existing.ProductName = product.ProductName;
+            existing.CategoryId = product.CategoryId;
+            existing.SKU = product.SKU;
+            existing.UnitPrice = product.UnitPrice;
+            existing.TotalQuantity = product.TotalQuantity;
+            existing.Active = product.Active;
+
+            await _context.SaveChangesAsync();
+            return existing;
         }
 
-        public bool Save()
+        public async Task<bool> DeleteAsync(int id)
         {
-            return _context.SaveChanges() > 0;
-        }
+            var product = await _context.Products.FindAsync(id);
+            if (product == null) return false;
 
-        public void Update(Product data)
-        {
-            _context.Products.Update(data);
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

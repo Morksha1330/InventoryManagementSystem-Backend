@@ -1,4 +1,7 @@
-﻿namespace InventoryMgtSystem.Models.Entities
+﻿
+using System.Text.Json.Serialization;
+
+namespace InventoryMgtSystem.Models.Entities
 {
     public class Product : BaseEntity
     {
@@ -8,6 +11,10 @@
         public int TotalQuantity { get; set; }
         public required decimal UnitPrice { get; set; }
         public bool Active { get; set; }
+
+        // Navigation property
+        [JsonIgnore]
+        public virtual Category Category { get; set; }
 
     }
 }
