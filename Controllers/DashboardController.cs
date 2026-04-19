@@ -24,14 +24,7 @@ namespace InventoryMgtSystem.Controllers
             _service = service;
         }
         
-        /// <summary>
-        /// Returns all dashboard KPIs, charts and table data in one call.
-        /// Query params let the Angular client override defaults if needed.
-        /// </summary>
-        /// <param name="lowStockThreshold">Products at or below this quantity appear in the low-stock list. Default: 10</param>
-        /// <param name="recentUserCount">Number of recent users to return. Default: 5</param>
-        /// <param name="topProductCount">Number of top-selling products to return. Default: 5</param>
-        /// <param name="trendDays">Number of days for the sales trend chart. Default: 7</param>
+        //dashboard summery eka ganna
         [HttpGet("summary")]
         [ProducesResponseType(typeof(HttpResponseData<DashboardDtos.DashboardSummaryDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(HttpResponseData<DashboardDtos.DashboardSummaryDto>), StatusCodes.Status500InternalServerError)]
@@ -57,81 +50,81 @@ namespace InventoryMgtSystem.Controllers
                 : StatusCode(response.ResponsCode, response);
         }
 
-        [HttpGet("UserCount")]
-        public IActionResult TotalUserCount()
-        {                         // take all users count
+        //[HttpGet("UserCount")]
+        //public IActionResult TotalUserCount()
+        //{                         
 
-            var count = _database.Users.Where(x => x.Active == true).ToList().Count;
-            return Ok(count);
-        }
+        //    var count = _database.Users.Where(x => x.Active == true).ToList().Count;
+        //    return Ok(count);
+        //}
 
-        [HttpGet("latestUsers")]                                    // take latest users details
-        public IActionResult LatestUsers()
-        {
+        //[HttpGet("latestUsers")]                                    
+        //public IActionResult LatestUsers()
+        //{
 
-            var latest = _database.Users.Where(x => x.Active == true).OrderByDescending(x => x.CreatedDate).Take(5).ToList();
-            return Ok(latest);
-        }
+        //    var latest = _database.Users.Where(x => x.Active == true).OrderByDescending(x => x.CreatedDate).Take(5).ToList();
+        //    return Ok(latest);
+        //}
 
-        [HttpGet("ProductCount")]                                   // take all product count
-        public IActionResult TotalProductCount()
-        {                         // take all users count
+        //[HttpGet("ProductCount")]                                   
+        //public IActionResult TotalProductCount()
+        //{                         
 
-            var count = _database.Products.Where(x => x.Active == true).ToList().Count;
-            return Ok(count);
-        }
+        //    var count = _database.Products.Where(x => x.Active == true).ToList().Count;
+        //    return Ok(count);
+        //}
 
-        [HttpGet("CategoryCount")]                                   // take all product count
-        public IActionResult TotalCategoryCount()
-        {                         // take all users count
+        //[HttpGet("CategoryCount")]                                   
+        //public IActionResult TotalCategoryCount()
+        //{                        
 
-            var count = _database.Categories.Where(x => x.Active == true).ToList().Count;
-            return Ok(count);
-        }
+        //    var count = _database.Categories.Where(x => x.Active == true).ToList().Count;
+        //    return Ok(count);
+        //}
 
-        [HttpGet("customerCount")]
-        public IActionResult TotalCustomerCount()                   // take all customers count
-        {
+        //[HttpGet("customerCount")]
+        //public IActionResult TotalCustomerCount()                   
+        //{
 
-            var count = _database.Customers.ToList().Count;
-            return Ok(count);
-        }
+        //    var count = _database.Customers.ToList().Count;
+        //    return Ok(count);
+        //}
 
 
-        [HttpGet("totalSales")]
-        public IActionResult TotalSales()                   // take total sales
-        {
+        //[HttpGet("totalSales")]
+        //public IActionResult TotalSales()                   
+        //{
 
-            var count = _database.SalesOrders.Sum(x => x.TotalAmount);
-            return Ok(count);
-        }
+        //    var count = _database.SalesOrders.Sum(x => x.TotalAmount);
+        //    return Ok(count);
+        //}
 
-        [HttpGet("totalExpenses")]
-        public IActionResult TotalExpenses()                   // take total expenses
-        {
+        //[HttpGet("totalExpenses")]
+        //public IActionResult TotalExpenses()                   
+        //{
 
-            var count = _database.PurchaseOrders.Sum(x => x.TotalAmount);
+        //    var count = _database.PurchaseOrders.Sum(x => x.TotalAmount);
 
-            return Ok(count);
-        }
+        //    return Ok(count);
+        //}
 
-        [HttpGet("TopSellingProd")]
-        public IActionResult TopSellingProd()                   // take top selling product
-        {
-            var xx = _database.SalesOrderItems
-                    .GroupBy(o => o.ProductId)
-                    .Select(g => new
-                    {
-                        ProductId = g.Key,
-                        TotalQuantity = g.Sum(x => x.Quantity),
+        //[HttpGet("TopSellingProd")]
+        //public IActionResult TopSellingProd()                   // take top selling product
+        //{
+        //    var xx = _database.SalesOrderItems
+        //            .GroupBy(o => o.ProductId)
+        //            .Select(g => new
+        //            {
+        //                ProductId = g.Key,
+        //                TotalQuantity = g.Sum(x => x.Quantity),
                         
-                    })
-                    .OrderByDescending(x => x.TotalQuantity)
-                    .FirstOrDefault()?.ProductId ?? 0;
+        //            })
+        //            .OrderByDescending(x => x.TotalQuantity)
+        //            .FirstOrDefault()?.ProductId ?? 0;
 
-            var vv = _database.Products.Where(x => x.Id == xx).Select(x => x.ProductName).ToList();
-            return Ok(vv.FirstOrDefault() ?? "No product found");
-        }
+        //    var vv = _database.Products.Where(x => x.Id == xx).Select(x => x.ProductName).ToList();
+        //    return Ok(vv.FirstOrDefault() ?? "No product found");
+        //}
 
     }
 }

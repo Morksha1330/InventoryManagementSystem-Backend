@@ -2,12 +2,14 @@
 using InventoryMgtSystem.Models;
 using InventoryMgtSystem.Services;
 using InventoryMgtSystem.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryMgtSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductController : ControllerBase
     {
         private readonly IProductService _service;

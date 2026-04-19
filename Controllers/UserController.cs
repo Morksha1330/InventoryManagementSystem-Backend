@@ -17,11 +17,6 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-        /// <summary>
-        /// Get paginated users with search filters
-        /// </summary>
-        /// <param name="filter">Filter parameters including search term, pagination, and sorting</param>
-        /// <returns>Paginated list of users with role names</returns>
         [HttpGet("paged")]
         public async Task<IActionResult> GetPagedUsers([FromQuery] UserFilterDto filter)
         {
@@ -53,10 +48,7 @@ public class UserController : ControllerBase
             return Ok(result);
         }
 
-        /// <summary>
-        /// Get user by ID
-        /// </summary>
-        /// <param name="id">User ID</param>
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(int id)
         {
@@ -64,9 +56,7 @@ public class UserController : ControllerBase
             return StatusCode(response.ResponsCode, response);
         }
 
-        /// <summary>
-        /// Create new user
-        /// </summary>
+
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] User user)
         {
@@ -86,9 +76,7 @@ public class UserController : ControllerBase
             return StatusCode(response.ResponsCode, response);
         }
 
-        /// <summary>
-        /// Update existing user
-        /// </summary>
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto user)
         {
@@ -120,9 +108,7 @@ public class UserController : ControllerBase
             return StatusCode(response.ResponsCode, response);
         }
 
-        /// <summary>
-        /// Delete user
-        /// </summary>
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -130,9 +116,7 @@ public class UserController : ControllerBase
             return StatusCode(response.ResponsCode, response);
         }
 
-        /// <summary>
-        /// Toggle user active status
-        /// </summary>
+
         [HttpPatch("{id}/toggle-status")]
         public async Task<IActionResult> ToggleUserStatus(int id)
         {

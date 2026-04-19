@@ -11,6 +11,7 @@ namespace InventoryMgtSystem.Models.Entities
 
         [JsonIgnore]
         public virtual ICollection<Product> Products { get; set; }
+        public virtual ICollection<SubCategory> SubCategories { get; set; }
 
     }
 }
