@@ -8,6 +8,9 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using InventoryMgtSystem.Services.Implementation;
 using InventoryMgtSystem.Services.Interface;
+using InventoryMgtSystem.Services;
+using InventoryMgtSystem.Repositories.Interface;
+using InventoryMgtSystem.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,6 +99,8 @@ builder.Services.AddScoped<IRolesRepository, RolesRepository>();
 builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 
 var app = builder.Build();

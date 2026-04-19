@@ -21,6 +21,7 @@ namespace InventoryMgtSystem.Models.Entities
         public int? InitialAttempt { get; set; }
         [Required]
         public string EPF_No { get; set; }
+        public string? PhoneNo { get; set; }
 
         // Navigation property
         [JsonIgnore]

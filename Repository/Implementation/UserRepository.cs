@@ -22,8 +22,6 @@ namespace InventoryMgtSystem.Repository.Implementation
             _context.Users.Add(user);
         }
 
-       
-
         public void Delete(int id)
         {
             var user = _context.Users.Find(id);
@@ -104,7 +102,9 @@ namespace InventoryMgtSystem.Repository.Implementation
                     Active = u.Active,
                     InitialAttempt = u.InitialAttempt,
                     CreatedUser = u.CreatedUser,
-                    CreatedDate = u.CreatedDate
+                    CreatedDate = u.CreatedDate,
+                    Phone = u.PhoneNo
+                    
                 })
                 .ToListAsync();
 

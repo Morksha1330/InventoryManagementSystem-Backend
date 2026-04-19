@@ -101,9 +101,13 @@ namespace InventoryMgtSystem.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterDto register) 
+        public async Task<ActionResult> Register([FromBody] RegisterDto register) 
         {
             var response = new HttpResponseData<object>();
+
+            var exist = await _database.Users
+                    .FirstOrDefaultAsync(u => u.EPF_No == register.EPF_No || u.Email == register.Email);
+
 
             var result = _database.Users.FirstOrDefault(x => x.Username == register.Username);
             var length = 7;
@@ -112,16 +116,17 @@ namespace InventoryMgtSystem.Controllers
             var user = new User();
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(otp, workFactor: 13);
 
-            if (result == null)
+            if (result == null && exist == null)
             {
                 user.Name = register.Name;
                 user.EPF_No = register.EPF_No;
                 user.Username = register.Username;
                 user.Email = register.Email;
-                user.RoleId = register.Role=="Admin"? 1:0;
+                user.RoleId = register.RoleId;
                 user.Active = true;
                 user.InitialAttempt = 0;
                 user.Password = hashedPassword;
+                user.PhoneNo = register.Phone;
 
                                 //Convert.ToString(otp);
 
@@ -129,17 +134,17 @@ namespace InventoryMgtSystem.Controllers
                 _database.SaveChanges();
 
 
-                var emailService = new EmailService();
+                //var emailService = new EmailService();
 
-                var subject = "Your Account Password";
-                var body = $"<h3>Welcome {user.Name}</h3>" +
-                           $"<p>Your temporary password is: <b>{otp}</b></p>" +
-                           "<p>Please change your password after login.</p>";
+                //var subject = "Your Account Password";
+                //var body = $"<h3>Welcome {user.Name}</h3>" +
+                //           $"<p>Your temporary password is: <b>{otp}</b></p>" +
+                //           "<p>Please change your password after login.</p>";
 
-                emailService.SendEmail(user.Email, subject, body);
+                //emailService.SendEmail(user.Email, subject, body);
 
-                response.Success = true;
-                response.Message = "User registered successfully. Password sent to email.";
+                //response.Success = true;
+                //response.Message = "User registered successfully. Password sent to email.";
 
                 response.Success = true;
                 response.Message = "User Registration Success!!";

@@ -13,4 +13,5 @@ public class UserDto
     public int? InitialAttempt { get; set; }
     public int? CreatedUser { get; set; }
     public DateTime? CreatedDate { get; set; }
+    public string? Phone { get; set; }
 }
