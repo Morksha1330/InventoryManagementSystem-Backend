@@ -15,3 +15,8 @@ public class UserDto
     public DateTime? CreatedDate { get; set; }
     public string? Phone { get; set; }
 }
+
+public class LogoutDto
+{
+    public string Token { get; set; }
+}

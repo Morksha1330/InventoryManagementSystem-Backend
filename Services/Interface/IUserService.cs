@@ -12,4 +12,7 @@ public interface IUserService
     Task<HttpResponseData<User>> UpdateUserAsync(UpdateUserDto user);
     Task<HttpResponseData<bool>> DeleteUserAsync(int id);
     Task<HttpResponseData<bool>> ToggleUserStatusAsync(int id);
+    Task<HttpResponseData<UserDto>> GetLoggedInUserProfileAsync(int userId);
+    Task<HttpResponseData<bool>> ChangePasswordAsync(int userId, ChangePassword dto);
+    Task<HttpResponseData<bool>> LogoutAsync(string token);
 }

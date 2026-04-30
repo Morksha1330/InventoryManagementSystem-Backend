@@ -13,5 +13,8 @@ namespace InventoryMgtSystem.Repository.Interface
         Task<bool> Save();
         Task<PagedResultDto<UserDto>> GetPagedUsersAsync(UserFilterDto filter);
         Task<bool> UserExistsAsync(string username, string email, int? excludeId = null);
+        Task<User> GetUserProfileAsync(int userId);
+        Task<bool> RevokeTokenAsync(string token);
+        Task<bool> IsTokenRevokedAsync(string token);
     }
 }

@@ -1,53 +1,127 @@
 ﻿using InventoryMgtSystem.Data;
+using InventoryMgtSystem.DTO;
 using InventoryMgtSystem.Models.Entities;
+using InventoryMgtSystem.Repository.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryMgtSystem.Repository.Implementation
 {
-    public class CategoriesRepository
+    public class CategoryRepository : ICategoryRepository
     {
         private readonly ApplicationDbContext _context;
 
-        public CategoriesRepository(ApplicationDbContext context)
+        public CategoryRepository(ApplicationDbContext context)
         {
             _context = context;
         }
-        public void Add(Category category)
-        {
-            _context.Add<Category>(category);
-        }
 
-        public void Delete(int id)
+        public async Task<PagedResultDto<CategoryDTO>> GetPagedCategoriesAsync(RequestFilterDto filter)
         {
-            var category = _context.Categories.Find(id);
-            if (category != null)
+            var query = _context.Categories
+                .Include(c => c.Products)
+                .Include(c => c.SubCategories)
+                .AsNoTracking()
+                .AsQueryable();
+
+            // 🔍 Search
+            if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
             {
-                _context.Categories.Remove(category);
+                query = query.Where(c =>
+                    c.CategoryName.Contains(filter.SearchTerm) ||
+                    c.CategoryCode.Contains(filter.SearchTerm));
             }
+
+            // 🔍 Active filter
+            if (filter.Active.HasValue)
+            {
+                query = query.Where(c => c.Active == filter.Active.Value);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            // 🔽 Sorting
+            query = filter.SortBy?.ToLower() switch
+            {
+                "categoryname" => filter.SortOrder == "DESC"
+                    ? query.OrderByDescending(c => c.CategoryName)
+                    : query.OrderBy(c => c.CategoryName),
+
+                "categorycode" => filter.SortOrder == "DESC"
+                    ? query.OrderByDescending(c => c.CategoryCode)
+                    : query.OrderBy(c => c.CategoryCode),
+
+                _ => filter.SortOrder == "DESC"
+                    ? query.OrderByDescending(c => c.Id)
+                    : query.OrderBy(c => c.Id)
+            };
+
+            // 📄 Pagination
+            var items = await query
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .Select(c => new CategoryDTO
+                {
+                    Id = c.Id,
+                    CategoryCode = c.CategoryCode,
+                    CategoryName = c.CategoryName,
+                    Description = c.Description,
+                    Active = c.Active,
+                    CreatedDate = c.CreatedDate,
+                    ProductCount = c.Products.Count,
+                    SubCategoryCount = c.SubCategories.Count
+                })
+                .ToListAsync();
+
+            return new PagedResultDto<CategoryDTO>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = filter.PageNumber,
+                PageSize = filter.PageSize
+            };
         }
 
-        public IEnumerable<Category> GetAll()
+        public async Task<List<Category>> GetAllAsync()
         {
-            return _context.Categories.ToList();
+            return await _context.Categories.ToListAsync();
         }
 
-        public Category GetUser(int id)
+        public async Task<Category?> GetByIdAsync(int id)
         {
-            var category = _context.Categories.FirstOrDefault(x => x.Id == id);
-            if (category == null)
-                throw new KeyNotFoundException("Category Not Fount");
+            return await _context.Categories
+                .Include(c => c.SubCategories)
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
 
+        public async Task<Category> AddAsync(Category category)
+        {
+            _context.Categories.Add(category);
+            await _context.SaveChangesAsync();
             return category;
         }
 
-        public bool Save()
+        public async Task<Category?> UpdateAsync(Category category)
         {
-            return _context.SaveChanges() > 0;
+            var existing = await _context.Categories.FindAsync(category.Id);
+            if (existing == null) return null;
+
+            existing.CategoryCode = category.CategoryCode;
+            existing.CategoryName = category.CategoryName;
+            existing.Description = category.Description;
+            existing.Active = category.Active;
+
+            await _context.SaveChangesAsync();
+            return existing;
         }
 
-        public void Update(Category category)
+        public async Task<bool> DeleteAsync(int id)
         {
-            _context.Categories.Update(category);
+            var entity = await _context.Categories.FindAsync(id);
+            if (entity == null) return false;
+
+            _context.Categories.Remove(entity);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
-

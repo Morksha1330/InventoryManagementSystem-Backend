@@ -111,6 +111,8 @@ namespace InventoryMgtSystem.Repositories
                     ProductName = p.ProductName,
                     CategoryId = p.CategoryId,
                     CategoryName = p.Category != null ? p.Category.CategoryName : "",
+                    SubCategoryId = p.SubCategoryId,
+                    SubCategoryName = p.SubCategory != null ? p.SubCategory.SubCategoryName:"",
                     TotalQuantity = p.TotalQuantity,
                     UnitPrice = p.UnitPrice,
                     Active = p.Active,

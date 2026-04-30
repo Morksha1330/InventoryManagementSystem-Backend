@@ -3,6 +3,7 @@ using InventoryMgtSystem.Models;
 using InventoryMgtSystem.Models.Entities;
 using InventoryMgtSystem.Repository.Interface;
 using InventoryMgtSystem.Services.Interface;
+using BCrypt.Net;
 
 namespace InventoryMgtSystem.Services.Implementation;
 
@@ -293,6 +294,141 @@ public class UserService : IUserService
 
         return response;
     }
+
+    public async Task<HttpResponseData<UserDto>> GetLoggedInUserProfileAsync(int userId)
+    {
+        var response = new HttpResponseData<UserDto>();
+
+        try
+        {
+            var user = await _userRepository.GetUserProfileAsync(userId);
+
+            response.Result = new UserDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Username = user.Username,
+                Email = user.Email,
+                EPF_No = user.EPF_No,
+                RoleId = user.RoleId,
+                RoleName = user.Role?.RoleName ?? string.Empty,
+                Active = user.Active,
+                InitialAttempt = user.InitialAttempt,
+                CreatedUser = user.CreatedUser,
+                CreatedDate = user.CreatedDate,
+                Phone = user.PhoneNo
+            };
+
+            response.Success = true;
+            response.ResponsCode = 200;
+            response.Message = "Profile retrieved successfully";
+        }
+        catch (KeyNotFoundException ex)
+        {
+            response.Success = false;
+            response.ResponsCode = 404;
+            response.Error = ex.Message;
+            response.Message = "User not found";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.ResponsCode = 500;
+            response.Error = ex.Message;
+            response.Message = "An error occurred while retrieving profile";
+        }
+
+        return response;
+    }
+
+    public async Task<HttpResponseData<bool>> ChangePasswordAsync(int userId, ChangePassword dto)
+    {
+        var response = new HttpResponseData<bool>();
+
+        try
+        {
+            var user = await _userRepository.GetUser(userId);
+
+            // Validate current password
+            if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.Password))
+            {
+                response.Success = false;
+                response.ResponsCode = 400;
+                response.Message = "Current password is incorrect";
+                return response;
+            }
+
+            // Prevent reusing same password
+            if (BCrypt.Net.BCrypt.Verify(dto.NewPassword, user.Password))
+            {
+                response.Success = false;
+                response.ResponsCode = 400;
+                response.Message = "New password cannot be same as current password";
+                return response;
+            }
+
+            // Hash new password
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+
+            user.Password = hashedPassword;
+
+            _userRepository.Update(user);
+            var result = await _userRepository.Save();
+
+            response.Result = result;
+            response.Success = result;
+            response.ResponsCode = result ? 200 : 400;
+            response.Message = result ? "Password changed successfully" : "Failed to change password";
+        }
+        catch (KeyNotFoundException)
+        {
+            response.Success = false;
+            response.ResponsCode = 404;
+            response.Message = "User not found";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.ResponsCode = 500;
+            response.Error = ex.Message;
+            response.Message = "An error occurred while changing password";
+        }
+
+        return response;
+    }
+
+    public async Task<HttpResponseData<bool>> LogoutAsync(string token)
+    {
+        var response = new HttpResponseData<bool>();
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                response.Success = false;
+                response.ResponsCode = 400;
+                response.Message = "Token is required";
+                return response;
+            }
+
+            await _userRepository.RevokeTokenAsync(token);
+
+            response.Result = true;
+            response.Success = true;
+            response.ResponsCode = 200;
+            response.Message = "Logged out successfully";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.ResponsCode = 500;
+            response.Error = ex.Message;
+            response.Message = "An error occurred during logout";
+        }
+
+        return response;
+    }
+
 }
 
 

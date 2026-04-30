@@ -156,53 +156,53 @@ namespace InventoryMgtSystem.Controllers
             return Ok(500);
         }
 
-        [HttpPost("change")]
-        public IActionResult ChangePassword([FromBody] ChangePassword login)
-        {
-            var response = new HttpResponseData<object>();
+        //[HttpPost("change")]
+        //public IActionResult ChangePassword([FromBody] ChangePassword login)
+        //{
+        //    var response = new HttpResponseData<object>();
 
-            var userId = Convert.ToInt32(User.FindFirst("id")?.Value);
+        //    var userId = Convert.ToInt32(User.FindFirst("id")?.Value);
 
-            var user = _database.Users.FirstOrDefault(x => x.Id == userId);
+        //    var user = _database.Users.FirstOrDefault(x => x.Id == userId);
 
-            if (user == null)
-            {
-                response.Success = false;
-                response.Message = "User not found";
-                response.ResponsCode = 404;
-                return NotFound(response);
-            }
+        //    if (user == null)
+        //    {
+        //        response.Success = false;
+        //        response.Message = "User not found";
+        //        response.ResponsCode = 404;
+        //        return NotFound(response);
+        //    }
 
-            var passwordCheck = BCrypt.Net.BCrypt.Verify(login.Password, user.Password);
+        //    var passwordCheck = BCrypt.Net.BCrypt.Verify(login.Password, user.Password);
 
-            if (!passwordCheck)
-            {
-                response.Success = false;
-                response.Message = "Current password is incorrect";
-                response.ResponsCode = 401;
-                return Unauthorized(response);
-            }
+        //    if (!passwordCheck)
+        //    {
+        //        response.Success = false;
+        //        response.Message = "Current password is incorrect";
+        //        response.ResponsCode = 401;
+        //        return Unauthorized(response);
+        //    }
 
-            if (login.newPassword != login.ConfirmPassword)
-            {
-                response.Success = false;
-                response.Message = "New passwords do not match";
-                response.ResponsCode = 400;
-                return BadRequest(response);
-            }
+        //    if (login.newPassword != login.ConfirmPassword)
+        //    {
+        //        response.Success = false;
+        //        response.Message = "New passwords do not match";
+        //        response.ResponsCode = 400;
+        //        return BadRequest(response);
+        //    }
 
-            // Update password correctly
-            user.Password = BCrypt.Net.BCrypt.HashPassword(login.newPassword, workFactor: 13);
-            user.InitialAttempt = 1;
+        //    // Update password correctly
+        //    user.Password = BCrypt.Net.BCrypt.HashPassword(login.newPassword, workFactor: 13);
+        //    user.InitialAttempt = 1;
 
-            _database.SaveChanges();
+        //    _database.SaveChanges();
 
-            response.Success = true;
-            response.Message = "Password changed successfully";
-            response.ResponsCode = 200;
+        //    response.Success = true;
+        //    response.Message = "Password changed successfully";
+        //    response.ResponsCode = 200;
 
-            return Ok(response);
-        }
+        //    return Ok(response);
+        //}
 
 
 

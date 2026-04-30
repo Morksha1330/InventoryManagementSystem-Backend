@@ -8,10 +8,12 @@
 
     }
 
-    public class ChangePassword : LoginDto
+    public class ChangePassword 
     {
-        public string? newPassword { get; set; }
-        public string? ConfirmPassword { get; set; }
+        public int UserId { get; set; }
+        public string? CurrentPassword { get; set; }
+
+        public string? NewPassword { get; set; }
     }
 
     public class customUser

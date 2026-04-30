@@ -11,6 +11,8 @@ namespace InventoryMgtSystem.Repository.Implementation
     public class UserRepository : IUserRepository
     {
         private readonly ApplicationDbContext _context;
+        private static readonly HashSet<string> _revokedTokens = new();
+
 
         public UserRepository(ApplicationDbContext context)
         {
@@ -152,6 +154,31 @@ namespace InventoryMgtSystem.Repository.Implementation
             }
 
             return await query.AnyAsync(u => u.Username == username || u.Email == email);
+        }
+
+        public async Task<User> GetUserProfileAsync(int userId)
+        {
+            var user = await _context.Users
+                .Include(u => u.Role)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+                throw new KeyNotFoundException("User Not Found");
+
+            return user;
+        }
+
+
+        public Task<bool> RevokeTokenAsync(string token)
+        {
+            _revokedTokens.Add(token);
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> IsTokenRevokedAsync(string token)
+        {
+            return Task.FromResult(_revokedTokens.Contains(token));
         }
     }
 }

@@ -17,6 +17,8 @@ namespace InventoryMgtSystem.Models.Entities
         // Navigation property
         [JsonIgnore]
         public virtual Category Category { get; set; }
+        [JsonIgnore]
+        public virtual SubCategory SubCategory { get; set; }
 
     }
 }
