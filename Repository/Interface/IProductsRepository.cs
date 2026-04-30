@@ -1,14 +1,15 @@
-﻿using InventoryMgtSystem.Models.Entities;
+﻿using InventoryMgtSystem.DTO;
+using InventoryMgtSystem.Models.Entities;
 
-namespace InventoryMgtSystem.Repository.Interface
+namespace InventoryMgtSystem.Repositories.Interface
 {
-    public interface IProductsRepository
+    public interface IProductRepository
     {
-        IEnumerable<Product> GetAll();
-        Product GetData(int id);
-        void Add(Product data);
-        void Update(Product data);
-        void Delete(int id);
-        bool Save();
+        Task<PagedResultDto<ProductDTO>> GetPagedProductsAsync(RequestFilterDto filter);
+        Task<List<Product>> GetAllAsync();
+        Task<Product?> GetByIdAsync(int id);
+        Task<Product> AddAsync(Product product);
+        Task<Product?> UpdateAsync(Product product);
+        Task<bool> DeleteAsync(int id);
     }
 }

@@ -1,15 +1,16 @@
-﻿using InventoryMgtSystem.Models.Entities;
+﻿using InventoryMgtSystem.DTO;
+using InventoryMgtSystem.Models.Entities;
 
 namespace InventoryMgtSystem.Repository.Interface
 {
     public interface ICategoryRepository
     {
-        IEnumerable<Category> GetAll();
-        Category GetData(int id);
-        void Add(Category data);
-        void Update(Category data);
-        void Delete(int id);
-        bool Save();
+        Task<PagedResultDto<CategoryDTO>> GetPagedCategoriesAsync(RequestFilterDto filter);
 
+        Task<List<Category>> GetAllAsync();
+        Task<Category?> GetByIdAsync(int id);
+        Task<Category> AddAsync(Category category);
+        Task<Category?> UpdateAsync(Category category);
+        Task<bool> DeleteAsync(int id);
     }
 }

@@ -40,6 +40,7 @@ namespace InventoryMgtSystem.Controllers
             _userservice = userservice;
             _jwt = jwtService;
         }
+        // Update your AuthController Login method
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<LoginResponseModel>> Login([FromBody] LoginDto login)
@@ -47,7 +48,9 @@ namespace InventoryMgtSystem.Controllers
             var response = new HttpResponseData<object>();
             try
             {
-                var user = await _database.Users.FirstOrDefaultAsync(u => u.Username == login.Username || u.Email == login.Username);
+                var user = await _database.Users
+                    .Include(u => u.Role) 
+                    .FirstOrDefaultAsync(u => u.Username == login.Username || u.Email == login.Username);
 
                 if (user == null)
                 {
@@ -56,7 +59,6 @@ namespace InventoryMgtSystem.Controllers
                     response.ResponsCode = 401;
                     return Unauthorized(response);
                 }
-
 
                 var result = BCrypt.Net.BCrypt.Verify(login.Password, user.Password); 
                 if (!result)
@@ -80,7 +82,9 @@ namespace InventoryMgtSystem.Controllers
                         user.Username,
                         user.Name,
                         user.Email,
-                        user.Role,
+                        RoleName = user.Role.RoleName ?? "User", 
+                        user.EPF_No,
+                        user.Active
                     }
                 };
                 response.ResponsCode = 200;
@@ -94,14 +98,16 @@ namespace InventoryMgtSystem.Controllers
                 response.ResponsCode = 500;
                 return StatusCode(500, response);
             }
-
-
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterDto register) 
+        public async Task<ActionResult> Register([FromBody] RegisterDto register) 
         {
             var response = new HttpResponseData<object>();
+
+            var exist = await _database.Users
+                    .FirstOrDefaultAsync(u => u.EPF_No == register.EPF_No || u.Email == register.Email);
+
 
             var result = _database.Users.FirstOrDefault(x => x.Username == register.Username);
             var length = 7;
@@ -110,16 +116,17 @@ namespace InventoryMgtSystem.Controllers
             var user = new User();
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(otp, workFactor: 13);
 
-            if (result == null)
+            if (result == null && exist == null)
             {
                 user.Name = register.Name;
                 user.EPF_No = register.EPF_No;
                 user.Username = register.Username;
                 user.Email = register.Email;
-                user.Role = register.Role=="Admin"? 1:0;
+                user.RoleId = register.RoleId;
                 user.Active = true;
                 user.InitialAttempt = 0;
                 user.Password = hashedPassword;
+                user.PhoneNo = register.Phone;
 
                                 //Convert.ToString(otp);
 
@@ -127,17 +134,17 @@ namespace InventoryMgtSystem.Controllers
                 _database.SaveChanges();
 
 
-                var emailService = new EmailService();
+                //var emailService = new EmailService();
 
-                var subject = "Your Account Password";
-                var body = $"<h3>Welcome {user.Name}</h3>" +
-                           $"<p>Your temporary password is: <b>{otp}</b></p>" +
-                           "<p>Please change your password after login.</p>";
+                //var subject = "Your Account Password";
+                //var body = $"<h3>Welcome {user.Name}</h3>" +
+                //           $"<p>Your temporary password is: <b>{otp}</b></p>" +
+                //           "<p>Please change your password after login.</p>";
 
-                emailService.SendEmail(user.Email, subject, body);
+                //emailService.SendEmail(user.Email, subject, body);
 
-                response.Success = true;
-                response.Message = "User registered successfully. Password sent to email.";
+                //response.Success = true;
+                //response.Message = "User registered successfully. Password sent to email.";
 
                 response.Success = true;
                 response.Message = "User Registration Success!!";
@@ -149,53 +156,53 @@ namespace InventoryMgtSystem.Controllers
             return Ok(500);
         }
 
-        [HttpPost("change")]
-        public IActionResult ChangePassword([FromBody] ChangePassword login)
-        {
-            var response = new HttpResponseData<object>();
+        //[HttpPost("change")]
+        //public IActionResult ChangePassword([FromBody] ChangePassword login)
+        //{
+        //    var response = new HttpResponseData<object>();
 
-            var userId = Convert.ToInt32(User.FindFirst("id")?.Value);
+        //    var userId = Convert.ToInt32(User.FindFirst("id")?.Value);
 
-            var user = _database.Users.FirstOrDefault(x => x.Id == userId);
+        //    var user = _database.Users.FirstOrDefault(x => x.Id == userId);
 
-            if (user == null)
-            {
-                response.Success = false;
-                response.Message = "User not found";
-                response.ResponsCode = 404;
-                return NotFound(response);
-            }
+        //    if (user == null)
+        //    {
+        //        response.Success = false;
+        //        response.Message = "User not found";
+        //        response.ResponsCode = 404;
+        //        return NotFound(response);
+        //    }
 
-            var passwordCheck = BCrypt.Net.BCrypt.Verify(login.Password, user.Password);
+        //    var passwordCheck = BCrypt.Net.BCrypt.Verify(login.Password, user.Password);
 
-            if (!passwordCheck)
-            {
-                response.Success = false;
-                response.Message = "Current password is incorrect";
-                response.ResponsCode = 401;
-                return Unauthorized(response);
-            }
+        //    if (!passwordCheck)
+        //    {
+        //        response.Success = false;
+        //        response.Message = "Current password is incorrect";
+        //        response.ResponsCode = 401;
+        //        return Unauthorized(response);
+        //    }
 
-            if (login.newPassword != login.ConfirmPassword)
-            {
-                response.Success = false;
-                response.Message = "New passwords do not match";
-                response.ResponsCode = 400;
-                return BadRequest(response);
-            }
+        //    if (login.newPassword != login.ConfirmPassword)
+        //    {
+        //        response.Success = false;
+        //        response.Message = "New passwords do not match";
+        //        response.ResponsCode = 400;
+        //        return BadRequest(response);
+        //    }
 
-            // Update password correctly
-            user.Password = BCrypt.Net.BCrypt.HashPassword(login.newPassword, workFactor: 13);
-            user.InitialAttempt = 1;
+        //    // Update password correctly
+        //    user.Password = BCrypt.Net.BCrypt.HashPassword(login.newPassword, workFactor: 13);
+        //    user.InitialAttempt = 1;
 
-            _database.SaveChanges();
+        //    _database.SaveChanges();
 
-            response.Success = true;
-            response.Message = "Password changed successfully";
-            response.ResponsCode = 200;
+        //    response.Success = true;
+        //    response.Message = "Password changed successfully";
+        //    response.ResponsCode = 200;
 
-            return Ok(response);
-        }
+        //    return Ok(response);
+        //}
 
 
 
